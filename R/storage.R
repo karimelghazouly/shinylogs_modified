@@ -94,9 +94,9 @@ store_sqlite <- function(path) {
 }
 
 
-write_logs <- function(opts, logs) {
+write_logs <- function(opts, logs, session_id) {
   if (opts$mode == "json") {
-    write_logs_json(opts, logs)
+    write_logs_json(opts, logs, session_id)
   } else if (opts$mode == "rds") {
     write_logs_rds(opts, logs)
   } else if (opts$mode == "null") {
@@ -109,10 +109,10 @@ write_logs <- function(opts, logs) {
 }
 
 #' @importFrom jsonlite write_json
-write_logs_json <- function(opts, logs) {
+write_logs_json <- function(opts, logs, session_id) {
   path <- file.path(
     opts$path,
-    paste0("shinylogs_", opts$appname, "_", opts$timestamp, ".json")
+    paste0("shinylogs_", session_id,".json")
   )
   jsonlite::write_json(x = logs, path = path, auto_unbox = TRUE)
   return(invisible(path))

@@ -129,6 +129,7 @@ parse_lastInput <- function(x, shinysession, name) {
 #' @example examples/track_usage-json.R
 #' @example examples/track_usage-console.R
 track_usage <- function(storage_mode,
+                        session_id,
                         exclude_input_regex = NULL,
                         exclude_input_id = NULL,
                         on_unload = FALSE,
@@ -154,7 +155,7 @@ track_usage <- function(storage_mode,
   )
   storage_mode$appname <- app_name
   storage_mode$timestamp <- format(as.integer64(nanotime(timestamp)), scientific = FALSE)
-  init_log$sessionid <- digest::digest(storage_mode$timestamp)
+  init_log$sessionid <- session_id
 
   if (isTRUE(dependencies)) {
     insertUI(
@@ -213,13 +214,21 @@ track_usage <- function(storage_mode,
         logs$session <- init_log
       }
       if (isTRUE(!user %in% exclude_users)) {
-        write_logs(storage_mode, logs)
+        # write_logs(storage_mode, logs, init_log$sessionid)
+        send_logs_to_datadog(logs, init_log$sessionid)
       }
     },
     session = session
   )
 }
 
+#' @importFrom jsonlite toJSON
+send_logs_to_datadog <- function(logs, session_id){
+  json_logs = toJSON(
+    logs
+  )
+  print(json_logs)
+}
 
 get_user_ <- function(session) {
   if (!is.null(session$user))
